@@ -9,8 +9,6 @@
 
     <ItemGroup>
       <PackageReference Include="LangChain" Version="0.15.3-dev.8" />
-      <PackageReference Include="LangChain.Databases.Chroma" Version="0.15.4-dev.23" />
-      <PackageReference Include="LangChain.Databases.Postgres" Version="0.15.4-dev.23" />
       <PackageReference Include="LangChain.Databases.Sqlite" Version="0.15.4-dev.5" />
       <PackageReference Include="LangChain.DocumentLoaders.Pdf" Version="0.15.3-dev.8" />
       <PackageReference Include="LangChain.Providers.Ollama" Version="0.15.3-dev.48" />
