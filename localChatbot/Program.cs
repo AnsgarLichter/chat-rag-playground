@@ -1,58 +1,44 @@
-﻿using LangChain.Databases.Sqlite;
-using LangChain.DocumentLoaders;
+﻿using LangChain.Memory;
+using LangChain.Providers;
 using LangChain.Providers.Ollama;
-using LangChain.Extensions;
-using LangChain.Memory;
-using Ollama;
-using Message = LangChain.Providers.Message;
-using MessageRole = LangChain.Providers.MessageRole;
+using localChatbot;
+using static LangChain.Chains.Chain;
 
-var provider = new OllamaProvider();
-//Converts text to embeddings
-var embeddingModel = new OllamaEmbeddingModel(provider, "all-minilm");
-var chatModel = new OllamaChatModel(provider, id: "nemotron-mini");
-var chatSettings = new OllamaChatSettings
+Console.WriteLine("Select from the following options:");
+
+int choiceNumber = 1;
+
+var choiceTexts = new[]
 {
-    UseStreaming = true
+    nameof(ChatHistory),
+    nameof(LocalRetrievalAugmentedGeneration),
 };
-
-var vectorDatabase = new SqLiteVectorDatabase(dataSource: "vectors.db");
-
-var vectorCollection = await vectorDatabase.AddDocumentsFromAsync<PdfPigPdfLoader>(
-    embeddingModel,
-    dimensions: 384, // Should be 384 for all-minilm
-    dataSource: DataSource.FromUrl(
-        "https://canonburyprimaryschool.co.uk/wp-content/uploads/2016/01/Joanne-K.-Rowling-Harry-Potter-Book-1-Harry-Potter-and-the-Philosophers-Stone-EnglishOnlineClub.com_.pdf"),
-    collectionName: "harrypotter", // Use only if you want to have multiple collections
-    textSplitter: null,
-    behavior: AddDocumentsToDatabaseBehavior.JustReturnCollectionIfCollectionIsAlreadyExists);
-
-chatModel.DeltaReceived += (_, delta) => Console.Write(delta.Content);
-while (true)
+foreach (var choiceText in choiceTexts)
 {
-    Console.WriteLine("Question: ");
-    var question = Console.ReadLine();
-    while (string.IsNullOrWhiteSpace(question))
-    {
-        Console.WriteLine("Please enter a question, not only whitespace: ");
-        question = Console.ReadLine();
-    }
-    
-    var similarDocuments = await vectorCollection.GetSimilarDocuments(embeddingModel, question, amount: 5);
-    
-    Console.WriteLine("Answer:");
-    var request = $"""
-                   Use the following pieces of context to answer the question at the end.
-                   If the answer is not in context then just say that you don't know, don't try to make up an answer.
-                   Keep the answer as short as possible.
+    Console.WriteLine($"    {choiceNumber}: {choiceText}");
+    choiceNumber++;
+}
 
-                   {similarDocuments.AsString()}
+Console.WriteLine();
+Console.Write("Enter choice: ");
 
-                   Question: {question}
-                   Helpful Answer:
-                   """;
-    await chatModel.GenerateAsync(
-        request,
-        chatSettings);
+string choiceEntry = Console.ReadLine() ?? string.Empty;
+if (int.TryParse(choiceEntry, out int choiceIndex))
+{
+    var choiceText = choiceTexts[--choiceIndex];
+    
     Console.WriteLine();
+    Console.WriteLine($"You selected '{choiceText}'");
+
+    switch (choiceText)
+    {
+        case nameof(ChatHistory):
+            await ChatHistory.StartConversation();
+            break;
+        case nameof(LocalRetrievalAugmentedGeneration):
+            await LocalRetrievalAugmentedGeneration.StartConversation();
+            break;
+        default:
+            throw new ArgumentOutOfRangeException($"Invalid choice index");
+    }
 }
