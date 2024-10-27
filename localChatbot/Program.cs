@@ -12,6 +12,7 @@ var choiceTexts = new[]
 {
     nameof(ChatHistory),
     nameof(LocalRetrievalAugmentedGeneration),
+    nameof(LocalRetrievalAugmentedGenerationWithHistory)
 };
 foreach (var choiceText in choiceTexts)
 {
@@ -37,6 +38,9 @@ if (int.TryParse(choiceEntry, out int choiceIndex))
             break;
         case nameof(LocalRetrievalAugmentedGeneration):
             await LocalRetrievalAugmentedGeneration.StartConversation();
+            break;
+        case nameof(LocalRetrievalAugmentedGenerationWithHistory):
+            await LocalRetrievalAugmentedGenerationWithHistory.StartConversation();
             break;
         default:
             throw new ArgumentOutOfRangeException($"Invalid choice index");
